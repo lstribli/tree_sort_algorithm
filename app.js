@@ -66,7 +66,7 @@ class UniqueRandomArray {
   }
 }
 //let's test it out
-const uniqueArray = new UniqueRandomArray(100000000);
+const uniqueArray = new UniqueRandomArray(10000);
 //let's make sure the algorithms iterate over identical data..
 const random_arr = uniqueArray.getArray();
 //by assigning a piece of memory to the first invocation
@@ -227,21 +227,38 @@ function run_RadixSort(){
   radixSort(arr);
   // console.log('radix',radixSort(arr));
 }
+
+
+//Tree Sort Avg @ 10^7: 1.777ms
+//Tree Sort Avg @ 10^10: 1.777ms
+//Tree Sort Avg @ 100000000: 1.777ms
+
 console.time();
 // console.log('tree sort');
-run_tree_sort();
+run_tree_sort(); 
 console.timeEnd();
+
+
+
+//QuickSort Avg @ 10^7: 1.328ms
+//QuickSort Avg @ 10^10: 1.777ms
+//QuickSort Avg @ 100000000: 1.777ms
 
 console.time();
 // console.log('quick sort');
 run_quicksort();
 console.timeEnd();
 
+
+
+//Radix Sort Avg @ 10^7: 4.853ms
+//Radix Sort Avg @ 10^10: 1.777ms
+//Radix Sort Avg @ 100000000: 4.853ms
+
 console.time();
 // console.log('radix sort');
 run_RadixSort();
 console.timeEnd();
-// async function send_tweets(){
 
 
 
