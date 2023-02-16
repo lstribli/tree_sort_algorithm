@@ -42,7 +42,10 @@ app.use(function(err, req, res, next) {
 
 
 
-
+//let's build a reusable class
+//generates an array of numbers
+//all numbers have to be unique
+//numbers must be out of order
 
 class UniqueRandomArray {
   constructor(size) {
@@ -62,14 +65,18 @@ class UniqueRandomArray {
     return this.array;
   }
 }
+//let's test it out
 const uniqueArray = new UniqueRandomArray(100000000);
+//let's make sure the algorithms iterate over identical data..
 const random_arr = uniqueArray.getArray();
+//by assigning a piece of memory to the first invocation
 const arr = random_arr;
 
 
 
 
-//set up our Tree sort
+//ok, let's set up our Tree sort
+//we'll need some nodes
 class TreeNode {
   constructor(value) {
     this.value = value;
@@ -77,7 +84,7 @@ class TreeNode {
     this.right = null;
   }
 }
-
+//Ok, we have our nodes- let's populate a tree
 function insertNode(root, value) {
   if (!root) {
     return new TreeNode(value);
@@ -89,7 +96,8 @@ function insertNode(root, value) {
   }
   return root;
 }
-
+//we're going to use recursion to navigate the tree
+//Let's navigate in both directions
 function inorderTraversal(root, arr) {
   if (!root) {
     return;
@@ -98,7 +106,9 @@ function inorderTraversal(root, arr) {
   arr.push(root.value);
   inorderTraversal(root.right, arr);
 }
-
+//Ok- now we make sure what we're about to process is an array..
+//And here we go. Grab that array, loop through it and populate the tree with our array
+//Then execute the algorithm
 function sortArrayUsingBinaryTree(arr) {
   if (!Array.isArray(arr) || arr.length < 1) {
     return arr;
@@ -128,7 +138,6 @@ function sortArrayUsingBinaryTree(arr) {
  
 
 function quicksort(arr, left = 0, right = arr.length - 1) {
-  // console.log(arr);
   if (left >= right) {
     return;
   }
@@ -206,30 +215,21 @@ function mostDigits(arr) {
 //verify integrity of arr
 // console.log(arr);
 
-function run_quick_bubble(){
+function run_tree_sort(){
   sortArrayUsingBinaryTree(arr);
   // console.log('bubbles',sortArrayUsingBinaryTree(arr));
 }
-
 function run_quicksort(){
   quicksort(arr);
   // console.log('quicksort',arr);  
 }
-
 function run_RadixSort(){
   radixSort(arr);
   // console.log('radix',radixSort(arr));
 }
-
-
-
-
-
-
-
 console.time();
-// console.log('quick bubble');
-run_quick_bubble();
+// console.log('tree sort');
+run_tree_sort();
 console.timeEnd();
 
 console.time();
