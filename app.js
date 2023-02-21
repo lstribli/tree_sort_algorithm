@@ -66,7 +66,7 @@ class UniqueRandomArray {
   }
 }
 //let's test it out
-const uniqueArray = new UniqueRandomArray(10000);
+const uniqueArray = new UniqueRandomArray(100000000000);
 //let's make sure the algorithms iterate over identical data..
 const random_arr = uniqueArray.getArray();
 //by assigning a piece of memory to the first invocation
@@ -212,6 +212,436 @@ function mostDigits(arr) {
 
 
 
+
+
+
+
+
+function glideSortRaw(head) {
+  if (!head || !head.next) {
+    return head; // Base case for empty or single-element list
+  }
+
+  const blockSize = Math.ceil(Math.sqrt(getListLength(head)));
+  const blockCount = Math.ceil(getListLength(head) / blockSize);
+  const buffer = new Array(blockSize);
+  const buffers = new Array(blockCount);
+
+  // Divide the list into blocks and sort each block using insertion sort
+  let i = 0;
+  let current = head;
+  while (current) {
+    let bufferIndex = 0;
+    for (; bufferIndex < blockSize && current; bufferIndex++) {
+      buffer[bufferIndex] = current.data;
+      current = current.next;
+    }
+    insertionSort(buffer, bufferIndex);
+    buffers[i++] = buffer.slice(0, bufferIndex);
+  }
+
+  // Merge the sorted blocks
+  let result = mergeBlocks(buffers);
+
+  return result;
+}
+
+function insertionSort(array, length) {
+  for (let i = 1; i < length; i++) {
+    const temp = array[i];
+    let j = i - 1;
+    while (j >= 0 && array[j] > temp) {
+      array[j + 1] = array[j];
+      j--;
+    }
+    array[j + 1] = temp;
+  }
+}
+function mergeBlocks(blocks) {
+  const blockCount = blocks.length;
+  const blockIndex = new Array(blockCount).fill(0);
+  const result = new Array(blockCount * blocks[0].length);
+  let resultIndex = 0;
+  let remainingElements = blockCount * blocks[0].length;
+
+  while (remainingElements > 0) {
+    let smallestValue = Infinity;
+    let smallestIndex = -1;
+
+    for (let i = 0; i < blockCount; i++) {
+      const index = blockIndex[i];
+      if (index < blocks[i].length && blocks[i][index] < smallestValue) {
+        smallestValue = blocks[i][index];
+        smallestIndex = i;
+      }
+    }
+
+    if (smallestIndex < 0) {
+      break;
+    }
+
+    result[resultIndex++] = smallestValue;
+    blockIndex[smallestIndex]++;
+    remainingElements--;
+  }
+
+  return createList(result.slice(0, resultIndex));
+}
+
+
+function ListNode(val) {
+  this.val = val;
+  this.next = null;
+}
+
+function createList(array) {
+  const dummyHead = new ListNode();
+  let current = dummyHead;
+  for (let i = 0; i < array.length; i++) {
+    current.next = new ListNode(array[i]);
+    current = current.next;
+  }
+  return dummyHead.next;
+}
+
+function getListLength(head) {
+  let length = 0;
+  let current = head;
+  while (current) {
+    length++;
+    current = current.next;
+  }
+  return length;
+}
+
+
+function glideSort(array) {
+  // Step 1: Convert the input array to a linked list.
+  let head = arrayToList(array);
+
+  // Step 2: Sort the linked list using the glide sort algorithm.
+  let blockCount = Math.ceil(Math.sqrt(array.length));
+  let blockSizes = calculateBlockSizes(head, blockCount);
+  let blockBuffers = createBlockBuffers(blockSizes);
+  sortBlocks(head, blockBuffers, blockSizes);
+  head = mergeBlocks(blockBuffers, blockSizes);
+
+  // Step 3: Convert the sorted linked list back to an array and return it.
+  return listToArray(head);
+}
+
+function arrayToList(array) {
+  let head = null;
+  let tail = null;
+  for (let i = 0; i < array.length; i++) {
+    let node = new ListNode(array[i]);
+    if (tail === null) {
+      head = node;
+      tail = node;
+    } else {
+      tail.next = node;
+      tail = node;
+    }
+  }
+  return head;
+}
+
+function listToArray(head) {
+  let array = [];
+  let node = head;
+  while (node !== null) {
+    array.push(node.val);
+    node = node.next;
+  }
+  return array;
+}
+
+function calculateBlockSizes(head, blockCount) {
+  let nodeCount = countNodes(head);
+  let blockSize = Math.ceil(nodeCount / blockCount);
+  let blockSizes = [];
+  let blockSum = 0;
+  let node = head;
+  for (let i = 0; i < blockCount; i++) {
+    let size = 0;
+    while (node !== null && size < blockSize) {
+      size++;
+      node = node.next;
+    }
+    blockSizes.push(size);
+    blockSum += size;
+  }
+  if (blockSum < nodeCount) {
+    blockSizes[blockSizes.length - 1] += nodeCount - blockSum;
+  }
+  return blockSizes;
+}
+
+function countNodes(head) {
+  let count = 0;
+  let node = head;
+  while (node !== null) {
+    count++;
+    node = node.next;
+  }
+  return count;
+}
+
+function createBlockBuffers(blockSizes) {
+  let blockBuffers = [];
+  for (let i = 0; i < blockSizes.length; i++) {
+    let blockSize = blockSizes[i];
+    let buffer = new CircularBuffer(blockSize);
+    blockBuffers.push(buffer);
+  }
+  return blockBuffers;
+}
+
+async function sortBlocks(head, blockBuffers, blockSizes) {
+  let node = head;
+  let bufferIndex = 0;
+  let bufferOffset = 0;
+  while (node !== null) {
+    let blockSize = blockSizes[bufferIndex];
+    let buffer = blockBuffers[bufferIndex];
+    if (bufferOffset === blockSize) {
+      bufferIndex++;
+      bufferOffset = 0;
+      blockSize = blockSizes[bufferIndex];
+      buffer = blockBuffers[bufferIndex];
+    }
+    buffer.push(node.val);
+    node = node.next;
+    bufferOffset++;
+  }
+
+  let workerCount = blockBuffers.length;
+  let workers = [];
+  for (let i = 0; i < workerCount; i++) {
+    let buffer = blockBuffers[i];
+    let size = blockSizes[i];
+    let worker = new Worker(sortWorker);
+    worker.postMessage({ buffer: buffer, size: size });
+    workers.push(worker);
+  }
+
+  let mergedBuffer = mergeBuffers(blockBuffers);
+  head = listFromBuffer(mergedBuffer);
+
+  // wait for workers to finish
+  let promises = workers.map(worker => new Promise(resolve => worker.onmessage = resolve));
+  await Promise.all(promises);
+
+  // Step 3: Merge the sorted block buffers back into a single linked list.
+  head = mergeBuffers(blockBuffers);
+  return head;
+}
+
+function mergeBuffers(buffers) {
+  let result = new CircularBuffer(0);
+  let minHeap = new MinHeap(buffers.length);
+  for (let i = 0; i < buffers.length; i++) {
+    let buffer = buffers[i];
+    if (!buffer.isEmpty()) {
+      let value = buffer.peek();
+      minHeap.push({ value: value, bufferIndex: i });
+    }
+  }
+  while (!minHeap.isEmpty()) {
+    let { value, bufferIndex } = minHeap.pop();
+    let buffer = buffers[bufferIndex];
+    result.push(value);
+    if (!buffer.isEmpty()) {
+      let value = buffer.pop();
+      minHeap.push({ value: value, bufferIndex: bufferIndex });
+    }
+  }
+  return result;
+}
+
+function listFromBuffer(buffer) {
+  let head = null;
+  let tail = null;
+  while (!buffer.isEmpty()) {
+    let node = new ListNode(buffer.pop());
+    if (tail === null) {
+      head = node;
+      tail = node;
+    } else {
+      tail.next = node;
+      tail = node;
+    }
+  }
+  return head;
+}
+
+class MinHeap {
+  constructor(capacity) {
+    this.capacity = capacity;
+    this.heap = new Array(capacity);
+    this.size = 0;
+  }
+
+  isEmpty() {
+    return this.size === 0;
+  }
+
+  push(value) {
+    if (this.size === this.capacity) {
+      throw new Error("Heap overflow");
+    }
+    this.heap[this.size] = value;
+    this.siftUp(this.size);
+    this.size++;
+  }
+
+  pop() {
+    if (this.size === 0) {
+      throw new Error("Heap underflow");
+    }
+    let value = this.heap[0];
+    this.size--;
+    this.heap[0] = this.heap[this.size];
+    this.siftDown(0);
+    return value;
+  }
+
+  siftUp(index) {
+    while (index > 0) {
+      let parentIndex = Math.floor((index - 1) / 2);
+      if (this.heap[parentIndex].value <= this.heap[index].value) {
+        break;
+      }
+      this.swap(parentIndex, index);
+      index = parentIndex;
+    }
+  }
+
+  siftDown(index) {
+    while (true) {
+      let leftChildIndex = 2 * index + 1;
+      let rightChildIndex = 2 * index + 2;
+      let minIndex = index;
+      if (leftChildIndex < this.size && this.heap[leftChildIndex].value < this.heap[minIndex].value) {
+        minIndex = leftChildIndex;
+      }
+      if (rightChildIndex < this.size && this.heap[rightChildIndex].value < this.heap[minIndex].value) {
+        minIndex = rightChildIndex;
+      }
+      if (minIndex !== index) {
+        this.swap(minIndex, index);
+        index = minIndex;
+      } else {
+        break;
+      }
+    }
+  }
+
+  swap(index1, index2) {
+    let temp = this.heap[index1];
+    this.heap[index1] = this.heap[index2];
+    this.heap[index2] = temp;
+  }
+}
+
+class CircularBuffer {
+  constructor(capacity) {
+    this.capacity = capacity;
+    this.buffer = new Array(capacity);
+    this.startIndex = 0;
+  }
+    push(value) {
+      this.buffer[(this.startIndex + this.size) % this.capacity] = value;
+      if (this.size === this.capacity) {
+        this.startIndex = (this.startIndex + 1) % this.capacity;
+      } else {
+        this.size++;
+      }
+    }
+
+    pop() {
+      if (this.isEmpty()) {
+        throw new Error("Buffer underflow");
+      }
+      let value = this.peek();
+      this.startIndex = (this.startIndex + 1) % this.capacity;
+      this.size--;
+      return value;
+    }
+
+    peek() {
+      if (this.isEmpty()) {
+        throw new Error("Buffer underflow");
+      }
+      return this.buffer[this.startIndex];
+    }
+
+    isEmpty() {
+      return this.size === 0;
+    }
+
+    isFull() {
+      return this.size === this.capacity;
+    }
+  }
+
+  // class ListNode {
+  //   constructor(value, next = null) {
+  //     this.value = value;
+  //     this.next = next;
+  //   }
+  // }
+  function glideSortOptimized(head) {
+    if (!head || !head.next) {
+      return head;
+    }
+  
+    let block_size = 1;
+    const len = getListLength(head);
+  
+    // ... Pass 1 and 2 ...
+  
+    // Pass 3: Merge the sublists of size 4
+    while (block_size < len) {
+      let node = dummyHead;
+      let counter = 0;
+      while (counter < len) {
+        let left = node.next;
+        let right = split(left, block_size);
+        let nextNode = right.next;
+        right.next = null;
+        right = split(nextNode, block_size);
+        let mergedBlock = mergeBlocks(left, right);
+        node.next = mergedBlock;
+        while (node.next) {
+          node = node.next;
+          counter++;
+        }
+      }
+      block_size *= 2;
+    }
+  
+    // Pass 4: Merge the sublists of size 8
+    let node = dummyHead;
+    let left = node.next;
+    let right = split(left, block_size);
+    let nextNode = right.next;
+    right.next = null;
+    right = split(nextNode, block_size);
+    let mergedBlock = mergeBlocks(left, right);
+    node.next = mergedBlock;
+  
+    return dummyHead.next;
+  }
+  
+
+
+
+  
+
+
+
+
 //verify integrity of arr
 // console.log(arr);
 
@@ -227,37 +657,45 @@ function run_RadixSort(){
   radixSort(arr);
   // console.log('radix',radixSort(arr));
 }
+function run_glide_sort(){
+  // glideSortRaw(arr);
+  // console.log('glide',glideSortRaw(arr));
+  glideSortOptimized(arr);
+  // console.log('glide_optimized',glideSortOptimized(arr));
+}
 
-
+//Tree Sort Avg @ 10^3: 0.181ms
 //Tree Sort Avg @ 10^7: 1.777ms
-//Tree Sort Avg @ 10^10: 1.777ms
-//Tree Sort Avg @ 100000000: 1.777ms
-
+//Tree Sort Avg @ 10^10: 48.412ms
 console.time();
 // console.log('tree sort');
 run_tree_sort(); 
 console.timeEnd();
 
 
-
+//QuickSort Avg @ 10^3: 0.103ms
 //QuickSort Avg @ 10^7: 1.328ms
-//QuickSort Avg @ 10^10: 1.777ms
-//QuickSort Avg @ 100000000: 1.777ms
-
+//QuickSort Avg @ 10^10: 18.258ms
 console.time();
 // console.log('quick sort');
 run_quicksort();
 console.timeEnd();
 
 
-
+//Radix Sort Avg @ 10^3: 0.219ms
 //Radix Sort Avg @ 10^7: 4.853ms
-//Radix Sort Avg @ 10^10: 1.777ms
-//Radix Sort Avg @ 100000000: 4.853ms
-
+//Radix Sort Avg @ 10^10: 75.513ms
 console.time();
 // console.log('radix sort');
 run_RadixSort();
+console.timeEnd();
+
+//Glide Sort Avg @ 10^3: .03ms
+//Glide Sort Avg @ 10^7: .06ms
+//Glide Sort Avg @ 10^10: .08ms
+console.time();
+// console.log('radix sort');
+run_glide_sort();
 console.timeEnd();
 
 
