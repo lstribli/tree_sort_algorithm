@@ -259,185 +259,56 @@ function mostDigits(arr) {
 
 
 
-function createList(array) {
-  const dummyHead = new ListNode();
-  let current = dummyHead;
-  for (let i = 0; i < array.length; i++) {
-    current.next = new ListNode(array[i]);
-    current = current.next;
-  }
-  return dummyHead.next;
-}
-
-
-function mergeBlocks(blocks) {
-  const blockCount = blocks.length;
-  const blockIndex = new Array(blockCount).fill(0);
-  const result = new Array(blockCount * blocks[0].length);
-  let resultIndex = 0;
-  let remainingElements = blockCount * blocks[0].length;
-
-  while (remainingElements > 0) {
-    let smallestValue = Infinity;
-    let smallestIndex = -1;
-
-    for (let i = 0; i < blockCount; i++) {
-      const index = blockIndex[i];
-      if (index < blocks[i].length && blocks[i][index] < smallestValue) {
-        smallestValue = blocks[i][index];
-        smallestIndex = i;
-      }
-    }
-
-    if (smallestIndex < 0) {
-      break;
-    }
-
-    result[resultIndex++] = smallestValue;
-    blockIndex[smallestIndex]++;
-    remainingElements--;
-  }
-
-  return createList(result.slice(0, resultIndex));
-}
-
-
-function ListNode(val) {
-  this.val = val;
-  this.next = null;
-}
-
-
-function getListLength(head) {
-  let length = 0;
-  let current = head;
-  while (current) {
-    length++;
-    current = current.next;
-  }
-  return length;
-}
-
-
-
-
-// function calculateBlockSizes(head, blockCount) {
-//   let nodeCount = countNodes(head);
-//   let blockSize = Math.ceil(nodeCount / blockCount);
-//   let blockSizes = [];
-//   let blockSum = 0;
-//   let node = head;
-//   for (let i = 0; i < blockCount; i++) {
-//     let size = 0;
-//     while (node !== null && size < blockSize) {
-//       size++;
-//       node = node.next;
-//     }
-//     blockSizes.push(size);
-//     blockSum += size;
+// function createList(array) {
+//   const dummyHead = new ListNode();
+//   let current = dummyHead;
+//   for (let i = 0; i < array.length; i++) {
+//     current.next = new ListNode(array[i]);
+//     current = current.next;
 //   }
-//   if (blockSum < nodeCount) {
-//     blockSizes[blockSizes.length - 1] += nodeCount - blockSum;
-//   }
-//   return blockSizes;
+//   return dummyHead.next;
 // }
 
-// function countNodes(head) {
-//   let count = 0;
-//   let node = head;
-//   while (node !== null) {
-//     count++;
-//     node = node.next;
-//   }
-//   return count;
-// }
 
-// function createBlockBuffers(blockSizes) {
-//   let blockBuffers = [];
-//   for (let i = 0; i < blockSizes.length; i++) {
-//     let blockSize = blockSizes[i];
-//     let buffer = new CircularBuffer(blockSize);
-//     blockBuffers.push(buffer);
-//   }
-//   return blockBuffers;
-// }
-
-// async function sortBlocks(head, blockBuffers, blockSizes) {
-//   let node = head;
-//   let bufferIndex = 0;
-//   let bufferOffset = 0;
-//   while (node !== null) {
-//     let blockSize = blockSizes[bufferIndex];
-//     let buffer = blockBuffers[bufferIndex];
-//     if (bufferOffset === blockSize) {
-//       bufferIndex++;
-//       bufferOffset = 0;
-//       blockSize = blockSizes[bufferIndex];
-//       buffer = blockBuffers[bufferIndex];
-//     }
-//     buffer.push(node.val);
-//     node = node.next;
-//     bufferOffset++;
-//   }
-
-//   let workerCount = blockBuffers.length;
-//   let workers = [];
-//   for (let i = 0; i < workerCount; i++) {
-//     let buffer = blockBuffers[i];
-//     let size = blockSizes[i];
-//     let worker = new Worker(sortWorker);
-//     worker.postMessage({ buffer: buffer, size: size });
-//     workers.push(worker);
-//   }
-
-//   let mergedBuffer = mergeBuffers(blockBuffers);
-//   head = listFromBuffer(mergedBuffer);
-
-//   // wait for workers to finish
-//   let promises = workers.map(worker => new Promise(resolve => worker.onmessage = resolve));
-//   await Promise.all(promises);
-
-//   // Step 3: Merge the sorted block buffers back into a single linked list.
-//   head = mergeBuffers(blockBuffers);
-//   return head;
-// }
-
-function mergeBuffers(buffers) {
-  let result = new CircularBuffer(0);
-  let minHeap = new MinHeap(buffers.length);
-  for (let i = 0; i < buffers.length; i++) {
-    let buffer = buffers[i];
-    if (!buffer.isEmpty()) {
-      let value = buffer.peek();
-      minHeap.push({ value: value, bufferIndex: i });
-    }
+class CircularBuffer {
+  constructor(capacity) {
+    this.capacity = capacity;
+    this.buffer = new Array(capacity);
+    this.startIndex = 0;
   }
-  while (!minHeap.isEmpty()) {
-    let { value, bufferIndex } = minHeap.pop();
-    let buffer = buffers[bufferIndex];
-    result.push(value);
-    if (!buffer.isEmpty()) {
-      let value = buffer.pop();
-      minHeap.push({ value: value, bufferIndex: bufferIndex });
-    }
-  }
-  return result;
-}
-
-function listFromBuffer(buffer) {
-  let head = null;
-  let tail = null;
-  while (!buffer.isEmpty()) {
-    let node = new ListNode(buffer.pop());
-    if (tail === null) {
-      head = node;
-      tail = node;
+  push(value) {
+    this.buffer[(this.startIndex + this.size) % this.capacity] = value;
+    if (this.size === this.capacity) {
+      this.startIndex = (this.startIndex + 1) % this.capacity;
     } else {
-      tail.next = node;
-      tail = node;
+      this.size++;
     }
   }
-  return head;
+
+  pop() {
+    if (this.isEmpty()) {
+      throw new Error('Buffer underflow');
+    }
+    let value = this.peek();
+    this.startIndex = (this.startIndex + 1) % this.capacity;
+    this.size--;
+    return value;
+  }
+
+  peek() {
+    if (this.isEmpty()) {
+      throw new Error('Buffer underflow');
+    }
+    return this.buffer[this.startIndex];
+  }
+
+  isEmpty() {
+    return this.size === 0;
+  }
+
+  isFull() {
+    return this.size === this.capacity;
+  }
 }
 
 class MinHeap {
@@ -507,47 +378,106 @@ class MinHeap {
     this.heap[index2] = temp;
   }
 }
-
-class CircularBuffer {
-  constructor(capacity) {
-    this.capacity = capacity;
-    this.buffer = new Array(capacity);
-    this.startIndex = 0;
-  }
-  push(value) {
-    this.buffer[(this.startIndex + this.size) % this.capacity] = value;
-    if (this.size === this.capacity) {
-      this.startIndex = (this.startIndex + 1) % this.capacity;
-    } else {
-      this.size++;
-    }
-  }
-
-  pop() {
-    if (this.isEmpty()) {
-      throw new Error('Buffer underflow');
-    }
-    let value = this.peek();
-    this.startIndex = (this.startIndex + 1) % this.capacity;
-    this.size--;
-    return value;
-  }
-
-  peek() {
-    if (this.isEmpty()) {
-      throw new Error('Buffer underflow');
-    }
-    return this.buffer[this.startIndex];
-  }
-
-  isEmpty() {
-    return this.size === 0;
-  }
-
-  isFull() {
-    return this.size === this.capacity;
-  }
+function ListNode(val) {
+  this.val = val;
+  this.next = null;
 }
+// HEURISTIC MERGE FUNCTION
+// function mergeBlocks(block1, block2) {
+//   let mergedBuffer = new CircularBuffer(block1.length + block2.length);
+
+//   let block1Index = 0;
+//   let block2Index = 0;
+
+//   while (block1Index < block1.length && block2Index < block2.length) {
+//     let item1 = block1[block1Index];
+//     let item2 = block2[block2Index];
+
+//     // Calculate the difference between the two random numbers
+//     let diff1 = Math.abs(item1.random - item2.random);
+//     let diff2 = Number.MAX_SAFE_INTEGER;
+
+//     // If there are more items in block1, calculate the difference
+//     // between the next item in block1 and the current item in block2
+//     if (block1Index < block1.length - 1) {
+//       let nextItem = block1[block1Index + 1];
+//       diff2 = Math.abs(nextItem.random - item2.random);
+//     }
+
+//     // Use the heuristic function to decide which item to add to the merged buffer
+//     if (diff1 < diff2) {
+//       mergedBuffer.add(item1);
+//       block1Index++;
+//     } else {
+//       mergedBuffer.add(item2);
+//       block2Index++;
+//     }
+//   }
+
+//   // Add any remaining items to the merged buffer
+//   while (block1Index < block1.length) {
+//     mergedBuffer.add(block1[block1Index]);
+//     block1Index++;
+//   }
+
+//   while (block2Index < block2.length) {
+//     mergedBuffer.add(block2[block2Index]);
+//     block2Index++;
+//   }
+
+//   // Convert the merged buffer to a linked list
+//   let head = mergedBuffer.get(0);
+//   let current = head;
+//   for (let i = 1; i < mergedBuffer.size(); i++) {
+//     let node = mergedBuffer.get(i);
+//     current.next = node;
+//     current = node;
+//   }
+
+//   return head;
+// }
+//Circular Buffer Version
+function mergeBlocks(blocks) {
+  const blockCount = blocks.length;
+  const buffers = new Array(blockCount);
+  for (let i = 0; i < blockCount; i++) {
+    buffers[i] = new CircularBuffer(blocks[i]);
+  }
+  
+  const minHeap = new MinHeap(blockCount);
+  for (let i = 0; i < blockCount; i++) {
+    minHeap.insert(i, buffers[i].read());
+  }
+  
+  let merged = null, tail = null;
+  while (!minHeap.isEmpty()) {
+    const [minIdx, minValue] = minHeap.extractMin();
+    if (merged === null) {
+      merged = tail = new ListNode(minValue);
+    } else {
+      tail.next = new ListNode(minValue);
+      tail = tail.next;
+    }
+    if (!buffers[minIdx].isEmpty()) {
+      const nextValue = buffers[minIdx].read();
+      minHeap.insert(minIdx, nextValue);
+    }
+  }
+  
+  return merged;
+}
+
+
+function getListLength(head) {
+  let length = 0;
+  let current = head;
+  while (current) {
+    length++;
+    current = current.next;
+  }
+  return length;
+}
+
 
 function split(head, blockSize) {
   const blocks = [];
