@@ -453,7 +453,7 @@ class MinHeap {
 
   push(value) {
     if (this.size === this.capacity) {
-      throw new Error("Heap overflow");
+      throw new Error('Heap overflow');
     }
     this.heap[this.size] = value;
     this.siftUp(this.size);
@@ -462,7 +462,7 @@ class MinHeap {
 
   pop() {
     if (this.size === 0) {
-      throw new Error("Heap underflow");
+      throw new Error('Heap underflow');
     }
     let value = this.heap[0];
     this.size--;
@@ -481,26 +481,25 @@ class MinHeap {
       index = parentIndex;
     }
   }
-
-  siftDown(index) {
-    while (true) {
-      let leftChildIndex = 2 * index + 1;
-      let rightChildIndex = 2 * index + 2;
-      let minIndex = index;
-      if (leftChildIndex < this.size && this.heap[leftChildIndex].value < this.heap[minIndex].value) {
-        minIndex = leftChildIndex;
+  siftDown(parent) {
+    let child = 2 * parent + 1;
+    const temp = this.heap[parent];
+    
+    while (child < this.size) {
+      if (child + 1 < this.size && this.heap[child + 1] > this.heap[child]) {
+        child++;
       }
-      if (rightChildIndex < this.size && this.heap[rightChildIndex].value < this.heap[minIndex].value) {
-        minIndex = rightChildIndex;
-      }
-      if (minIndex !== index) {
-        this.swap(minIndex, index);
-        index = minIndex;
+      if (this.heap[child] > temp) {
+        this.heap[parent] = this.heap[child];
+        parent = child;
+        child = 2 * parent + 1;
       } else {
         break;
       }
     }
+    this.heap[parent] = temp;
   }
+  
 
   swap(index1, index2) {
     let temp = this.heap[index1];
