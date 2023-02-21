@@ -554,6 +554,11 @@ console.time();
 run_glide_sort();
 console.timeEnd();
 
-
-
+function test_glide_sort(){
+  if(new Set(arr) !== run_glide_sort()){
+    return true;
+  }
+  else return false;
+}
+console.log(test_glide_sort());
 module.exports = app;
