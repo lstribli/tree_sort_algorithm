@@ -554,11 +554,19 @@ console.time();
 run_glide_sort();
 console.timeEnd();
 
-function test_glide_sort(){
-  if(new Set(arr) !== run_glide_sort()){
-    return true;
+function test_glide_sort() {
+  const sortedArray = arr.slice().sort((a, b) => a - b);
+
+  const glideSortedArray = glideSortOptimized(arr);
+
+  for (let i = 0; i < arr.length; i++) {
+    if (sortedArray[i] !== glideSortedArray[i]) {
+      console.log('Sorting failed');
+      return;
+    }
   }
-  else return false;
+
+  console.log('Sorting successful');
 }
-console.log(test_glide_sort());
+test_glide_sort();
 module.exports = app;
