@@ -136,7 +136,7 @@ function sortArrayUsingBinaryTree(arr) {
 
 
  
-
+//QUICKSORT-------------------------------------------------------------------------
 function quicksort(arr, left = 0, right = arr.length - 1) {
   if (left >= right) {
     return;
@@ -174,7 +174,7 @@ function swap(arr, i, j) {
 
 
 
-
+//RADIX SORT------------------------------------------------------------
 function radixSort(arr) {
   const maxDigitCount = mostDigits(arr);
 
@@ -214,62 +214,7 @@ function mostDigits(arr) {
 
 
 
-
-
-// function glideSortRaw(head) {
-//   if (!head || !head.next) {
-//     return head; // Base case for empty or single-element list
-//   }
-
-//   const blockSize = Math.ceil(Math.sqrt(getListLength(head)));
-//   const blockCount = Math.ceil(getListLength(head) / blockSize);
-//   const buffer = new Array(blockSize);
-//   const buffers = new Array(blockCount);
-
-//   // Divide the list into blocks and sort each block using insertion sort
-//   let i = 0;
-//   let current = head;
-//   while (current) {
-//     let bufferIndex = 0;
-//     for (; bufferIndex < blockSize && current; bufferIndex++) {
-//       buffer[bufferIndex] = current.data;
-//       current = current.next;
-//     }
-//     insertionSort(buffer, bufferIndex);
-//     buffers[i++] = buffer.slice(0, bufferIndex);
-//   }
-
-//   // Merge the sorted blocks
-//   let result = mergeBlocks(buffers);
-
-//   return result;
-// }
-
-// function insertionSort(array, length) {
-//   for (let i = 1; i < length; i++) {
-//     const temp = array[i];
-//     let j = i - 1;
-//     while (j >= 0 && array[j] > temp) {
-//       array[j + 1] = array[j];
-//       j--;
-//     }
-//     array[j + 1] = temp;
-//   }
-// }
-
-
-
-// function createList(array) {
-//   const dummyHead = new ListNode();
-//   let current = dummyHead;
-//   for (let i = 0; i < array.length; i++) {
-//     current.next = new ListNode(array[i]);
-//     current = current.next;
-//   }
-//   return dummyHead.next;
-// }
-
-
+//GLIDE SORT---------------------------------------------------------------------------
 class CircularBuffer {
   constructor(capacity) {
     this.capacity = capacity;
@@ -382,7 +327,7 @@ function ListNode(val) {
   this.val = val;
   this.next = null;
 }
-// HEURISTIC MERGE FUNCTION
+// HEURISTIC MERGE VERSION********************************
 // function mergeBlocks(block1, block2) {
 //   let mergedBuffer = new CircularBuffer(block1.length + block2.length);
 
@@ -436,7 +381,9 @@ function ListNode(val) {
 
 //   return head;
 // }
-//Circular Buffer Version
+
+
+//Circular Buffer Version****************
 function mergeBlocks(blocks) {
   const blockCount = blocks.length;
   const buffers = new Array(blockCount);
@@ -551,13 +498,6 @@ function glideSortOptimized(head) {
 }
 
 
-
-
-  
-
-
-
-
 //verify integrity of arr
 // console.log(arr);
 
@@ -606,9 +546,9 @@ console.time();
 run_RadixSort();
 console.timeEnd();
 
-//Glide Sort Avg @ 10^3: .03ms
-//Glide Sort Avg @ 10^7: .06ms
-//Glide Sort Avg @ 10^10: .08ms
+//Glide Sort Avg @ 10^3: .03ms  xD
+//Glide Sort Avg @ 10^7: .06ms  xD
+//Glide Sort Avg @ 10^10: .08ms xD
 console.time();
 // console.log('radix sort');
 run_glide_sort();
