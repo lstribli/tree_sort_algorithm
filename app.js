@@ -66,7 +66,7 @@ class UniqueRandomArray {
   }
 }
 //let's test it out
-const uniqueArray = new UniqueRandomArray(100000000000);
+const uniqueArray = new UniqueRandomArray(100000000);
 //let's make sure the algorithms iterate over identical data..
 const random_arr = uniqueArray.getArray();
 //by assigning a piece of memory to the first invocation
@@ -216,47 +216,60 @@ function mostDigits(arr) {
 
 
 
+// function glideSortRaw(head) {
+//   if (!head || !head.next) {
+//     return head; // Base case for empty or single-element list
+//   }
 
-function glideSortRaw(head) {
-  if (!head || !head.next) {
-    return head; // Base case for empty or single-element list
+//   const blockSize = Math.ceil(Math.sqrt(getListLength(head)));
+//   const blockCount = Math.ceil(getListLength(head) / blockSize);
+//   const buffer = new Array(blockSize);
+//   const buffers = new Array(blockCount);
+
+//   // Divide the list into blocks and sort each block using insertion sort
+//   let i = 0;
+//   let current = head;
+//   while (current) {
+//     let bufferIndex = 0;
+//     for (; bufferIndex < blockSize && current; bufferIndex++) {
+//       buffer[bufferIndex] = current.data;
+//       current = current.next;
+//     }
+//     insertionSort(buffer, bufferIndex);
+//     buffers[i++] = buffer.slice(0, bufferIndex);
+//   }
+
+//   // Merge the sorted blocks
+//   let result = mergeBlocks(buffers);
+
+//   return result;
+// }
+
+// function insertionSort(array, length) {
+//   for (let i = 1; i < length; i++) {
+//     const temp = array[i];
+//     let j = i - 1;
+//     while (j >= 0 && array[j] > temp) {
+//       array[j + 1] = array[j];
+//       j--;
+//     }
+//     array[j + 1] = temp;
+//   }
+// }
+
+
+
+function createList(array) {
+  const dummyHead = new ListNode();
+  let current = dummyHead;
+  for (let i = 0; i < array.length; i++) {
+    current.next = new ListNode(array[i]);
+    current = current.next;
   }
-
-  const blockSize = Math.ceil(Math.sqrt(getListLength(head)));
-  const blockCount = Math.ceil(getListLength(head) / blockSize);
-  const buffer = new Array(blockSize);
-  const buffers = new Array(blockCount);
-
-  // Divide the list into blocks and sort each block using insertion sort
-  let i = 0;
-  let current = head;
-  while (current) {
-    let bufferIndex = 0;
-    for (; bufferIndex < blockSize && current; bufferIndex++) {
-      buffer[bufferIndex] = current.data;
-      current = current.next;
-    }
-    insertionSort(buffer, bufferIndex);
-    buffers[i++] = buffer.slice(0, bufferIndex);
-  }
-
-  // Merge the sorted blocks
-  let result = mergeBlocks(buffers);
-
-  return result;
+  return dummyHead.next;
 }
 
-function insertionSort(array, length) {
-  for (let i = 1; i < length; i++) {
-    const temp = array[i];
-    let j = i - 1;
-    while (j >= 0 && array[j] > temp) {
-      array[j + 1] = array[j];
-      j--;
-    }
-    array[j + 1] = temp;
-  }
-}
+
 function mergeBlocks(blocks) {
   const blockCount = blocks.length;
   const blockIndex = new Array(blockCount).fill(0);
@@ -294,15 +307,6 @@ function ListNode(val) {
   this.next = null;
 }
 
-function createList(array) {
-  const dummyHead = new ListNode();
-  let current = dummyHead;
-  for (let i = 0; i < array.length; i++) {
-    current.next = new ListNode(array[i]);
-    current = current.next;
-  }
-  return dummyHead.next;
-}
 
 function getListLength(head) {
   let length = 0;
@@ -315,127 +319,88 @@ function getListLength(head) {
 }
 
 
-function glideSort(array) {
-  // Step 1: Convert the input array to a linked list.
-  let head = arrayToList(array);
 
-  // Step 2: Sort the linked list using the glide sort algorithm.
-  let blockCount = Math.ceil(Math.sqrt(array.length));
-  let blockSizes = calculateBlockSizes(head, blockCount);
-  let blockBuffers = createBlockBuffers(blockSizes);
-  sortBlocks(head, blockBuffers, blockSizes);
-  head = mergeBlocks(blockBuffers, blockSizes);
 
-  // Step 3: Convert the sorted linked list back to an array and return it.
-  return listToArray(head);
-}
+// function calculateBlockSizes(head, blockCount) {
+//   let nodeCount = countNodes(head);
+//   let blockSize = Math.ceil(nodeCount / blockCount);
+//   let blockSizes = [];
+//   let blockSum = 0;
+//   let node = head;
+//   for (let i = 0; i < blockCount; i++) {
+//     let size = 0;
+//     while (node !== null && size < blockSize) {
+//       size++;
+//       node = node.next;
+//     }
+//     blockSizes.push(size);
+//     blockSum += size;
+//   }
+//   if (blockSum < nodeCount) {
+//     blockSizes[blockSizes.length - 1] += nodeCount - blockSum;
+//   }
+//   return blockSizes;
+// }
 
-function arrayToList(array) {
-  let head = null;
-  let tail = null;
-  for (let i = 0; i < array.length; i++) {
-    let node = new ListNode(array[i]);
-    if (tail === null) {
-      head = node;
-      tail = node;
-    } else {
-      tail.next = node;
-      tail = node;
-    }
-  }
-  return head;
-}
+// function countNodes(head) {
+//   let count = 0;
+//   let node = head;
+//   while (node !== null) {
+//     count++;
+//     node = node.next;
+//   }
+//   return count;
+// }
 
-function listToArray(head) {
-  let array = [];
-  let node = head;
-  while (node !== null) {
-    array.push(node.val);
-    node = node.next;
-  }
-  return array;
-}
+// function createBlockBuffers(blockSizes) {
+//   let blockBuffers = [];
+//   for (let i = 0; i < blockSizes.length; i++) {
+//     let blockSize = blockSizes[i];
+//     let buffer = new CircularBuffer(blockSize);
+//     blockBuffers.push(buffer);
+//   }
+//   return blockBuffers;
+// }
 
-function calculateBlockSizes(head, blockCount) {
-  let nodeCount = countNodes(head);
-  let blockSize = Math.ceil(nodeCount / blockCount);
-  let blockSizes = [];
-  let blockSum = 0;
-  let node = head;
-  for (let i = 0; i < blockCount; i++) {
-    let size = 0;
-    while (node !== null && size < blockSize) {
-      size++;
-      node = node.next;
-    }
-    blockSizes.push(size);
-    blockSum += size;
-  }
-  if (blockSum < nodeCount) {
-    blockSizes[blockSizes.length - 1] += nodeCount - blockSum;
-  }
-  return blockSizes;
-}
+// async function sortBlocks(head, blockBuffers, blockSizes) {
+//   let node = head;
+//   let bufferIndex = 0;
+//   let bufferOffset = 0;
+//   while (node !== null) {
+//     let blockSize = blockSizes[bufferIndex];
+//     let buffer = blockBuffers[bufferIndex];
+//     if (bufferOffset === blockSize) {
+//       bufferIndex++;
+//       bufferOffset = 0;
+//       blockSize = blockSizes[bufferIndex];
+//       buffer = blockBuffers[bufferIndex];
+//     }
+//     buffer.push(node.val);
+//     node = node.next;
+//     bufferOffset++;
+//   }
 
-function countNodes(head) {
-  let count = 0;
-  let node = head;
-  while (node !== null) {
-    count++;
-    node = node.next;
-  }
-  return count;
-}
+//   let workerCount = blockBuffers.length;
+//   let workers = [];
+//   for (let i = 0; i < workerCount; i++) {
+//     let buffer = blockBuffers[i];
+//     let size = blockSizes[i];
+//     let worker = new Worker(sortWorker);
+//     worker.postMessage({ buffer: buffer, size: size });
+//     workers.push(worker);
+//   }
 
-function createBlockBuffers(blockSizes) {
-  let blockBuffers = [];
-  for (let i = 0; i < blockSizes.length; i++) {
-    let blockSize = blockSizes[i];
-    let buffer = new CircularBuffer(blockSize);
-    blockBuffers.push(buffer);
-  }
-  return blockBuffers;
-}
+//   let mergedBuffer = mergeBuffers(blockBuffers);
+//   head = listFromBuffer(mergedBuffer);
 
-async function sortBlocks(head, blockBuffers, blockSizes) {
-  let node = head;
-  let bufferIndex = 0;
-  let bufferOffset = 0;
-  while (node !== null) {
-    let blockSize = blockSizes[bufferIndex];
-    let buffer = blockBuffers[bufferIndex];
-    if (bufferOffset === blockSize) {
-      bufferIndex++;
-      bufferOffset = 0;
-      blockSize = blockSizes[bufferIndex];
-      buffer = blockBuffers[bufferIndex];
-    }
-    buffer.push(node.val);
-    node = node.next;
-    bufferOffset++;
-  }
+//   // wait for workers to finish
+//   let promises = workers.map(worker => new Promise(resolve => worker.onmessage = resolve));
+//   await Promise.all(promises);
 
-  let workerCount = blockBuffers.length;
-  let workers = [];
-  for (let i = 0; i < workerCount; i++) {
-    let buffer = blockBuffers[i];
-    let size = blockSizes[i];
-    let worker = new Worker(sortWorker);
-    worker.postMessage({ buffer: buffer, size: size });
-    workers.push(worker);
-  }
-
-  let mergedBuffer = mergeBuffers(blockBuffers);
-  head = listFromBuffer(mergedBuffer);
-
-  // wait for workers to finish
-  let promises = workers.map(worker => new Promise(resolve => worker.onmessage = resolve));
-  await Promise.all(promises);
-
-  // Step 3: Merge the sorted block buffers back into a single linked list.
-  head = mergeBuffers(blockBuffers);
-  return head;
-}
+//   // Step 3: Merge the sorted block buffers back into a single linked list.
+//   head = mergeBuffers(blockBuffers);
+//   return head;
+// }
 
 function mergeBuffers(buffers) {
   let result = new CircularBuffer(0);
@@ -550,90 +515,112 @@ class CircularBuffer {
     this.buffer = new Array(capacity);
     this.startIndex = 0;
   }
-    push(value) {
-      this.buffer[(this.startIndex + this.size) % this.capacity] = value;
-      if (this.size === this.capacity) {
-        this.startIndex = (this.startIndex + 1) % this.capacity;
-      } else {
-        this.size++;
-      }
-    }
-
-    pop() {
-      if (this.isEmpty()) {
-        throw new Error("Buffer underflow");
-      }
-      let value = this.peek();
+  push(value) {
+    this.buffer[(this.startIndex + this.size) % this.capacity] = value;
+    if (this.size === this.capacity) {
       this.startIndex = (this.startIndex + 1) % this.capacity;
-      this.size--;
-      return value;
-    }
-
-    peek() {
-      if (this.isEmpty()) {
-        throw new Error("Buffer underflow");
-      }
-      return this.buffer[this.startIndex];
-    }
-
-    isEmpty() {
-      return this.size === 0;
-    }
-
-    isFull() {
-      return this.size === this.capacity;
+    } else {
+      this.size++;
     }
   }
 
-  // class ListNode {
-  //   constructor(value, next = null) {
-  //     this.value = value;
-  //     this.next = next;
-  //   }
-  // }
-  function glideSortOptimized(head) {
-    if (!head || !head.next) {
-      return head;
+  pop() {
+    if (this.isEmpty()) {
+      throw new Error('Buffer underflow');
     }
-  
-    let block_size = 1;
-    const len = getListLength(head);
-  
-    // ... Pass 1 and 2 ...
-  
-    // Pass 3: Merge the sublists of size 4
-    while (block_size < len) {
-      let node = dummyHead;
-      let counter = 0;
-      while (counter < len) {
-        let left = node.next;
-        let right = split(left, block_size);
-        let nextNode = right.next;
-        right.next = null;
-        right = split(nextNode, block_size);
-        let mergedBlock = mergeBlocks(left, right);
-        node.next = mergedBlock;
-        while (node.next) {
-          node = node.next;
-          counter++;
-        }
-      }
-      block_size *= 2;
+    let value = this.peek();
+    this.startIndex = (this.startIndex + 1) % this.capacity;
+    this.size--;
+    return value;
+  }
+
+  peek() {
+    if (this.isEmpty()) {
+      throw new Error('Buffer underflow');
     }
-  
-    // Pass 4: Merge the sublists of size 8
+    return this.buffer[this.startIndex];
+  }
+
+  isEmpty() {
+    return this.size === 0;
+  }
+
+  isFull() {
+    return this.size === this.capacity;
+  }
+}
+
+function split(head, blockSize) {
+  const blocks = [];
+  let prev = null;
+  let curr = head;
+  let count = 0;
+
+  while (curr !== null) {
+    count++;
+    if (count % blockSize === 0) {
+      const next = curr.next;
+      curr.next = null;
+      blocks.push(prev === null ? curr : prev.next);
+      prev = curr = next;
+    } else {
+      curr = curr.next;
+    }
+  }
+
+  if (prev !== null) {
+    blocks.push(prev);
+  }
+
+  return blocks;
+}
+
+
+function glideSortOptimized(head) {
+  if (!head || !head.next) {
+    return head;
+  }
+
+  let block_size = 1;
+  const len = getListLength(head);
+
+  // ... Pass 1 and 2 ...
+
+  // Pass 3: Merge the sublists of size 4
+  while (block_size < len) {
+    let dummyHead;
     let node = dummyHead;
-    let left = node.next;
-    let right = split(left, block_size);
-    let nextNode = right.next;
-    right.next = null;
-    right = split(nextNode, block_size);
-    let mergedBlock = mergeBlocks(left, right);
-    node.next = mergedBlock;
-  
-    return dummyHead.next;
+    let counter = 0;
+    while (counter < len) {
+      let left = node.next;
+      let right = split(left, block_size);
+      let nextNode = right.next;
+      right.next = null;
+      right = split(nextNode, block_size);
+      let mergedBlock = mergeBlocks(left, right);
+      node.next = mergedBlock;
+      while (node.next) {
+        node = node.next;
+        counter++;
+      }
+    }
+    block_size *= 2;
   }
-  
+
+  // Pass 4: Merge the sublists of size 8
+  let dummyHead;
+  let node = dummyHead;
+  let left = node.next;
+  let right = split(left, block_size);
+  let nextNode = right.next;
+  right.next = null;
+  right = split(nextNode, block_size);
+  let mergedBlock = mergeBlocks(left, right);
+  node.next = mergedBlock;
+
+  return dummyHead.next;
+}
+
 
 
 
